@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-export ARG_UID=${ESSDIVE_UID:-76553}
-export ARG_GID=${ESSDIVE_GID:-72528}
-export REGISTRY_SPIN=registry.nersc.gov/m2690
+
+# export ARG_UID=${ESSDIVE_UID:-76553}
+# export ARG_GID=${ESSDIVE_GID:-72528}
+export REGISTRY_SPIN=registry.nersc.gov/m3408
 
 export RANCHER2_CLUSTER_DEV=c-fwj56
 export RANCHER2_CLUSTER_PROD=c-tmq7p
@@ -17,13 +18,14 @@ if [[ ! -z $1 &&  "$1" = "prod" ]]
 then
   cluster=$RANCHER2_CLUSTER_PROD
   kubectl config use-context production
-  rancher context switch c-tmq7p:p-r64xs
-  export HELM_NAMESPACE=data
+  rancher context switch c-tmq7p:p-bkv45
+  # change this eventually
+  export HELM_NAMESPACE=nmdc-helm-test
 else
   kubectl config use-context development
-  rancher context switch c-fwj56:p-b694p
+  rancher context switch c-fwj56:p-nlxq2
   if [ -z $HELM_NAMESPACE ]; then
-    export HELM_NAMESPACE=data-dev
+    export HELM_NAMESPACE=nmdc-helm-test 
   fi
 fi
 
