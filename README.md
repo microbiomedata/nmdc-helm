@@ -1,6 +1,11 @@
 
+## Helm for Spin and Profit
 
-Setup
+Rancher Setup:
+- Download rancher CLI
+- Get token from https://rancher2.spin.nersc.gov/apikeys 
+
+Env Setup
 ```
 export HELM_NAMESPACE="nmdc-helm-test"
 export HELM_KUBETOKEN="token-xxxxx:yyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
