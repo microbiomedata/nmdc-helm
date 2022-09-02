@@ -2,7 +2,20 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 2
+replicaCount: 1
+
+global:
+  # spin - Values for NERSC Spin Platform
+  spin:
+    # global.spin.enabled - enable spin configurations
+    enabled: true
+    # global.spin.creatorId - Spin user id
+    creatorId: "u-i3jpt7usa5"
+    # global.spin.clusterName - This can either be 'development' or 'production'
+    clusterName: development
+    # serverAlias - spin  server alias (used in domain name and  ingress annotation)
+    serverAlias: svc
+    workloadSelector: "deployment-nmdc-helm-test-web"
 
 image:
   repository: "httpd"

@@ -17,12 +17,12 @@ cluster=$RANCHER2_CLUSTER_DEV
 if [[ ! -z $1 &&  "$1" = "prod" ]]
 then
   cluster=$RANCHER2_CLUSTER_PROD
-  kubectl config use-context production
+  rancher kubectl config use-context production
   rancher context switch c-tmq7p:p-bkv45
   # change this eventually
   export HELM_NAMESPACE=nmdc-helm-test
 else
-  kubectl config use-context development
+  rancher kubectl config use-context development
   rancher context switch c-fwj56:p-nlxq2
   if [ -z $HELM_NAMESPACE ]; then
     export HELM_NAMESPACE=nmdc-helm-test 
@@ -37,7 +37,7 @@ fi
 
 export HELM_KUBETOKEN=$RANCHER_TOKEN
 export HELM_KUBEAPISERVER=https://rancher2.spin.nersc.gov/k8s/clusters/$cluster
-kubectl config set-context --current --namespace=$HELM_NAMESPACE
+rancher kubectl config set-context --current --namespace=$HELM_NAMESPACE
 
 echo "HELM_KUBEAPISERVER=$HELM_KUBEAPISERVER"
 echo "HELM_NAMESPACE=$HELM_NAMESPACE"

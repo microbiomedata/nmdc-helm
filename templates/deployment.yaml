@@ -2,18 +2,26 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   annotations:
-    field.cattle.io/creatorId: u-i3jpt7usa5
+    {{- if .Values.global.spin.enabled }}
+    field.cattle.io/creatorId: "{{ .Values.global.spin.creatorId }}"
+    {{- end }}
   labels:
-    workload.user.cattle.io/workloadselector: deployment-nmdc-helm-test-web
+    {{- if .Values.global.spin.enabled }}
+    workload.user.cattle.io/workloadselector: {{ .Values.global.spin.workloadSelector }}
+    {{- end }}
   name: {{ include "nmdc-test.fullname" . }}
-  namespace: nmdc-helm-test
+  namespace: {{ .Release.Namespace }}
 spec:
   progressDeadlineSeconds: 600
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      workload.user.cattle.io/workloadselector: deployment-nmdc-helm-test-web
+      {{- if .Values.global.spin.enabled }}
+      workload.user.cattle.io/workloadselector: {{ .Values.global.spin.workloadSelector }}
+      {{- end }}
   strategy:
     rollingUpdate:
       maxSurge: 1
@@ -22,7 +30,9 @@ spec:
   template:
     metadata:
       labels:
-        workload.user.cattle.io/workloadselector: deployment-nmdc-helm-test-web
+        {{- if .Values.global.spin.enabled }}
+        workload.user.cattle.io/workloadselector: {{ .Values.global.spin.workloadSelector }}
+        {{- end }}
     spec:
       containers:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -38,6 +48,8 @@ spec:
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+
       terminationGracePeriodSeconds: 30
 
