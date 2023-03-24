@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nmdc.fullname" . }}-backend
+  labels:
+    {{- include "nmdc.labels" . | nindent 4 }}
+    component: backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "nmdc.selectorLabels" . | nindent 6 }}
+      component: backend
+  template:
+    metadata:
+      {{- with .Values.backend.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "nmdc.selectorLabels" . | nindent 8 }}
+        component: backend
+    spec:
+      {{- with .Values.backend.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "nmdc.backend.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.backend.securityContext | nindent 12 }}
+          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+          env:
+          - name: NMDC_DB_POOL_SIZE
+            value: "4"
+          - name: NMDC_HOST
+            value: {{ .Values.nmdc.host | quote }}
+          - name: PGDATABASE
+            value: {{ .Values.global.postgresql.auth.database | quote }}
+          - name: PGHOST
+            value: {{ include "nmdc.fullname" . }}-postgresql
+          - name: PGUSER
+            value: {{ .Values.global.postgresql.auth.username | quote }}
+          - name: WEB_CONCURRENCY
+            value: "5"
+          - name: POSTGRES_URI
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "nmdc.fullname" . }}-backend
+                key: POSTGRES_URI
+            #- name: NMDC_DATABASE_URI
+            #  valueFrom:
+            #    secretKeyRef:
+            #      key: POSTGRES_URI
+            #      name: postgres
+            #      optional: false
+          - name: PGPASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "nmdc.fullname" . }}-backend
+                key: PGPASSWORD
+          #FIXME
+          #- name: NMDC_SENTRY_DSN
+          #  valueFrom:
+          #    secretKeyRef:
+          #      key: DSN_ASGI
+          #      name: sentry
+          #      optional: false
+          envFrom:
+          # FIXME
+          #- secretRef:
+          #    name: orcid-client-shreyas
+          #    optional: false
+          #- secretRef:
+          #    name: mongo
+          #    optional: false
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.port }}
+              protocol: TCP
+# FIXME
+#         livenessProbe:
+#           httpGet:
+#             path: /
+#             port: http
+#         readinessProbe:
+#           httpGet:
+#             path: /
+#             port: http
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+      {{- with .Values.backend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

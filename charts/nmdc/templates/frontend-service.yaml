@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nmdc.fullname" . }}-frontend
+  labels:
+    {{- include "nmdc.labels" . | nindent 4 }}
+    component: frontend
+spec:
+  type: {{ .Values.frontend.service.type }}
+  ports:
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "nmdc.selectorLabels" . | nindent 4 }}
+    component: frontend

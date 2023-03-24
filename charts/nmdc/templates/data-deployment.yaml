@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "nmdc.fullname" . }}-data
+  labels:
+    {{- include "nmdc.labels" . | nindent 4 }}
+    component: data
+spec:
+  replicas: {{ .Values.data.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "nmdc.selectorLabels" . | nindent 6 }}
+      component: data
+  template:
+    metadata:
+      {{- with .Values.data.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "nmdc.selectorLabels" . | nindent 8 }}
+        component: data
+    spec:
+      {{- with .Values.data.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "nmdc.data.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.data.securityContext | nindent 12 }}
+          image: "{{ .Values.data.image.repository }}:{{ .Values.data.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.data.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.data.service.port }}
+              protocol: TCP
+# FIXME
+#         livenessProbe:
+#           httpGet:
+#             path: /
+#             port: http
+#         readinessProbe:
+#           httpGet:
+#             path: /
+#             port: http
+          resources:
+            {{- toYaml .Values.data.resources | nindent 12 }}
+          volumeMounts:
+          - mountPath: /usr/share/nginx/html
+            name: vol1
+            readOnly: true
+      {{- with .Values.data.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.data.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.data.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: vol1
+        emptyDir: {}
