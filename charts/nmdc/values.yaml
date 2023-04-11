@@ -144,12 +144,20 @@ backend:
     hosts:
       - host: chart-example.local
         paths:
-          - path: /
+          - path: /api
             pathType: Prefix
     tls: []
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
+
+  oidc:
+    enabled: false
+    client:
+      id: ""
+      secret: ""
+
+  extraEnv: []
 
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious

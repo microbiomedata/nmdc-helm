@@ -1,19 +1,19 @@
-{{- if .Values.frontend.ingress.enabled -}}
+{{- if .Values.backend.ingress.enabled -}}
 {{- $fullName := include "nmdc.fullname" . }}
-{{- $port := .Values.frontend.service.port }}
+{{- $port := .Values.backend.service.port }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $fullName }}-frontend
-  {{- with .Values.frontend.ingress.annotations }}
+  name: {{ $fullName }}-backend
+  {{- with .Values.backend.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  ingressClassName: {{ .Values.frontend.ingress.className }}
-  {{- if .Values.frontend.ingress.tls }}
+  ingressClassName: {{ .Values.backend.ingress.className }}
+  {{- if .Values.backend.ingress.tls }}
   tls:
-    {{- range .Values.frontend.ingress.tls }}
+    {{- range .Values.backend.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -22,7 +22,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.frontend.ingress.hosts }}
+    {{- range .Values.backend.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
@@ -31,7 +31,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $fullName }}-frontend
+                name: {{ $fullName }}-backend
                 port:
                   number: {{ $port }}
           {{- end }}

@@ -44,20 +44,43 @@ spec:
           - name: PGHOST
             value: {{ include "nmdc.fullname" . }}-postgresql
           - name: PGUSER
+            #value: {{ .Values.global.postgresql.auth.username | quote }}
             value: {{ .Values.global.postgresql.auth.username | quote }}
           - name: WEB_CONCURRENCY
             value: "5"
+          {{- if .Values.backend.oidc.enabled }}
+          - name: NMDC_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "nmdc.fullname" . }}-backend
+                key: CLIENT_ID
+          - name: NMDC_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "nmdc.fullname" . }}-backend
+                key: CLIENT_SECRET
+          {{- end }}
           - name: POSTGRES_URI
             valueFrom:
               secretKeyRef:
                 name: {{ include "nmdc.fullname" . }}-backend
-                key: POSTGRES_URI
-            #- name: NMDC_DATABASE_URI
-            #  valueFrom:
-            #    secretKeyRef:
-            #      key: POSTGRES_URI
-            #      name: postgres
-            #      optional: false
+                # FIXME key: POSTGRES_URI
+                key: ADMIN_POSTGRES_URI
+          - name: NMDC_INGEST_DATABASE_URI
+            valueFrom:
+              secretKeyRef:
+                # FIXME key: POSTGRES_URI
+                key: ADMIN_POSTGRES_URI
+                name: {{ include "nmdc.fullname" . }}-backend
+                optional: false
+#FIXME this one seems to have allowed migration to work...
+          - name: NMDC_DATABASE_URI
+            valueFrom:
+              secretKeyRef:
+                #key: POSTGRES_URI
+                key: ADMIN_POSTGRES_URI
+                name: {{ include "nmdc.fullname" . }}-backend
+                optional: false
           - name: PGPASSWORD
             valueFrom:
               secretKeyRef:
@@ -70,6 +93,9 @@ spec:
           #      key: DSN_ASGI
           #      name: sentry
           #      optional: false
+          {{- with .Values.backend.extraEnv }}
+          {{ . | toYaml | nindent 10 }}
+          {{- end }}
           envFrom:
           # FIXME
           #- secretRef:
