@@ -48,6 +48,10 @@ spec:
             value: {{ .Values.global.postgresql.auth.username | quote }}
           - name: WEB_CONCURRENCY
             value: "5"
+          {{- if not .Values.backend.bulkDownload.enabled }}
+          - name: NMDC_DISABLE_BULK_DOWNLOAD
+            value: yes
+          {{- end }}
           {{- if .Values.backend.oidc.enabled }}
           - name: NMDC_CLIENT_ID
             valueFrom:

@@ -157,6 +157,9 @@ backend:
       id: ""
       secret: ""
 
+  bulkDownload:
+    enabled: true
+
   extraEnv: []
 
   resources: {}
